@@ -10,15 +10,15 @@ Plugin.create(:mikutter_adventure) {
       (メッセージ, ボタン) = MikutterAdventure.ゲーム.resume(押されたボタン)
 
       if ボタン
-        timeline(:アドベンチャー) << Message.new(system: true, message: メッセージ, confirm: ボタン, confirm_callback: lambda { |押されたボタン| ボタンが押された時の処理(押されたボタン) })
+        timeline(:adventure) << Message.new(system: true, message: メッセージ, confirm: ボタン, confirm_callback: lambda { |押されたボタン| ボタンが押された時の処理(押されたボタン) })
       else
-        timeline(:アドベンチャー) << Message.new(system: true, message: メッセージ)
+        timeline(:adventure) << Message.new(system: true, message: メッセージ)
       end
     }
   end
 
-  tab(:アドベンチャー, "みくったーアドベンチャー") {
-    timeline(:アドベンチャー)
+  tab(:adventure, "ADV") {
+    timeline(:adventure)
 
     Plugin.create(:mikutter_adventure).ボタンが押された時の処理(nil)
   }
