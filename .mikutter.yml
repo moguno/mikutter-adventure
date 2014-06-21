@@ -1,0 +1,10 @@
+---
+slug: :mikutter-adventure
+depends:
+  mikutter: change_account
+  plugin:
+  - gui
+version: '0.0.1'
+author: 
+name: mikutter-adventure
+description: adventure
