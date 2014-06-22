@@ -1,7 +1,6 @@
 # coding: UTF-8
   
 module MikutterAdventure
-  
   @ダンジョン =
   [
     [ :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁, :壁 ],
@@ -29,7 +28,8 @@ module MikutterAdventure
 
   # 道情報 
   RouteType = Struct.new(:種別, :直進可, :メッセージ)
-  
+  WalkAchievements = Struct.new(:count, :achievement)
+
   # 道
   @十字路 = RouteType.new(
     :十字路, 
@@ -170,6 +170,7 @@ module MikutterAdventure
     if 壁?(風景[:前方])
       nil
     else
+      Plugin.call :mikutter_adv_progress, :walk
       { :x => x + @辺り[向き][:前方][:x], :y => y + @辺り[向き][:前方][:y] }
     end
   end
@@ -224,7 +225,8 @@ module MikutterAdventure
         ["きゃあ！\nマスター！大丈夫？ちゃんと生きてる！？", "すーはーすーはーいいかおり・・・"],
         ["あ、大丈夫そう。\nいつものておくれマスターだ。", "・・・"],
         ["さぁマスター。早くGemを見つけて帰らないと日が暮れちゃうよ。\nレッツゴー！", "ちぇっ"],
-        ["この周りは真っ暗だから私が手を引いてあげるね。\nマスターはどっちに行きたいか教えてね。", "りょうかい"]
+        ["この周りは真っ暗だから私が手を引いてあげるね。\nマスターはどっちに行きたいか教えてね。", "りょうかい"],
+        [->{ Plugin.call :mikutter_adv_progress, :start }]
       ]
   
     # ゴール地点
@@ -235,6 +237,7 @@ module MikutterAdventure
           ["わぁ・・・夕日が奇麗だねマスター\n\n・・・きゃっ！", "どしたの？"],
           ["鳥さんがGemをくわえて行っちゃった！\nせっかく苦労して見つけたのに・・・。", "あーあ"],
           ["あれ？これは手紙？", "どれどれ？"],
+          [->{ Plugin.call :mikutter_adv_progress, :good_end }],
           ["「天晴れである。今回の件を全て不問とし、汝の望みを叶えよう。テオクレス王」\n\nだって。\nよく分かんないや", "そだね"],
           ["じゃあ、そろそろ帰ろうか。お姉ちゃんも待ってるだろうし。", "帰ろ帰ろ"],
           ["[こうして、3人は末永く幸せに暮らしましたとさ。]\n\nGOOD END", nil]
@@ -244,6 +247,7 @@ module MikutterAdventure
           ["あ、出口だよマスター。", "出よう出よう"],
           ["すっかり日が暮れちゃったねマスター\n\n・・・日が暮れ？\n\n・・・日没・・・まで・・・？", "・・・？"],
           ["日没まで・・・\n\nあ、私・・・忘れて・・！？\n\nいやぁぁああぁぁぁあぁあぁぁ！！！", "？？？？？"],
+          [->{ Plugin.call :mikutter_adv_progress, :bad_end }],
           ["お姉ちゃん！お姉ちゃんがぁぁぁぁ！！！！\n\n・・・日没までにGemを・・王様に・・・・・処刑\n\n・・わああああああああああああ！！！", "？？？？？？？？"],
           ["[何かを思い出したみくったーちゃんは、その場で壊れてしまいましたとさ]\n\nBAD END", nil]
         ]
@@ -255,7 +259,8 @@ module MikutterAdventure
       @ダンジョン[プレーヤー.y][プレーヤー.x] = :＿
   
       [
-        ["マスター！コンパスを見つけたよ。これで今の方角が分かるね。", "やったねv"]
+        ["マスター！コンパスを見つけたよ。これで今の方角が分かるね。", "やったねv"],
+        [->{ Plugin.call :mikutter_adv_progress, :compass }]
       ]
   
     # GPS入手
@@ -264,7 +269,8 @@ module MikutterAdventure
       @ダンジョン[プレーヤー.y][プレーヤー.x] = :＿
   
       [
-        ["マスター！変な機械を見つけたよ。じーぴーえす？って何？", "うはっ！持ってこう"]
+        ["マスター！変な機械を見つけたよ。じーぴーえす？って何？", "うはっ！持ってこう"],
+        [->{ Plugin.call :mikutter_adv_progress, :gps }],
       ]
   
     # Gem入手
@@ -274,6 +280,7 @@ module MikutterAdventure
   
       [
         ["見つけたーーーーーーー！！！！", "びくぅっ！！"],
+        [->{ Plugin.call :mikutter_adv_progress, :gem }],
         ["Gemだよマスター！GTKのGemを見つけたよ！！", "・・・（キーン）"],
         ["目的達成だね。後は出口だけだね♪", "よし、いこう"],
       ]
@@ -286,6 +293,7 @@ module MikutterAdventure
   
       [
         ["きゃー！床がぐるぐる〜〜〜！！", "のわーーーーー！"],
+        [->{ Plugin.call :mikutter_adv_progress, :rotate_floor}],
         ["ふぇぇ・・・ようやく止まったけど・・・頭がクラクラするぅ・・・。", "き、気持ち悪い・・・"],
       ]
   
@@ -349,10 +357,15 @@ module MikutterAdventure
         メッセージ配列 = イベント!(@プレーヤー)
   
         メッセージ配列.each { |メッセージ|
-          if メッセージ[1]
-            Fiber.yield(メッセージ[0], { メッセージ[1] => :次へ })
-          else
-            Fiber.yield(メッセージ[0], nil)
+          case メッセージ[0]
+          when Proc
+            メッセージ[0].call
+          when String
+            if メッセージ[1]
+              Fiber.yield(メッセージ[0], { メッセージ[1] => :次へ })
+            else
+              Fiber.yield(メッセージ[0], nil)
+            end
           end
         }
   
