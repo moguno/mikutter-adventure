@@ -4,6 +4,7 @@ depends:
   mikutter: change_account
   plugin:
   - gui
+  - achievement
 version: '0.0.2'
 author: 
 name: mikutter-adventure
