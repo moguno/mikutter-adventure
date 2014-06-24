@@ -4,7 +4,7 @@ depends:
   mikutter: change_account
   plugin:
   - gui
-version: '0.2.1'
+version: '0.2.2'
 author: 
 name: mikutter-adventure
 description: adventure
