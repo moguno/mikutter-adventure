@@ -41,6 +41,7 @@ Plugin.create(:mikutter_adventure) {
   実績 :rotate_floor, "床が回ってぐるぐるする〜ｗ"
   実績 :gps, "GPSを見つけた", "現在位置が分かるアイテムがあれば楽なんだけどなぁ…"
   実績 :gem, "Gemを見つけた"
+  実績 :kanabun, "カナブンを見つけた"
   実績 :good_end, "Gemを持ち帰った"
   実績 :bad_end, "Gemを持ち帰ることができなかった"
 
@@ -70,7 +71,7 @@ Plugin.create(:mikutter_adventure) {
   defachievement(:mikutter_adv_item_collector,
                  description: "Mikutter Adventureの全てのアイテムを取得した",
                  hidden: true,
-                 depends: %w(compass gps gem).map{|_|:"mikutter_adv_#{_}"},
+                 depends: %w(compass gps gem kanabun).map{|_|:"mikutter_adv_#{_}"},
                  &:take!)
 
   defachievement(:mikutter_adv_all_ending,
