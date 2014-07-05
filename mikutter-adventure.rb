@@ -30,13 +30,14 @@ Plugin.create(:mikutter_adventure) {
   end
 
   tab(:adventure, "ADV") {
+    set_icon(File.join(File.dirname(__FILE__), "gem.png"))
     timeline(:adventure)
 
     Plugin.create(:mikutter_adventure).ボタンが押された時の処理(nil)
   }
 
   # 実績
-  実績 :start, "冒険を始めた", "ADV タブで、 Mikutter Adventure をプレイしよう！"
+  実績 :start, "冒険を始めた", "宝石マークのタブを開いて、みくったーアドベンチャーをプレイしよう！"
   実績 :compass, "コンパスを見つけた", "方角が分かるアイテムがあるといいんだけど…"
   実績 :rotate_floor, "床が回ってぐるぐるする〜ｗ"
   実績 :gps, "GPSを見つけた", "現在位置が分かるアイテムがあれば楽なんだけどなぁ…"
