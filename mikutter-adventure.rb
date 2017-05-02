@@ -1,18 +1,38 @@
 # coding: UTF-8
 
 require File.join(File.dirname(__FILE__), "miquest.rb")
+require File.join(File.dirname(__FILE__), "models.rb")
 require File.join(CHIConfig::PLUGIN_PATH, "change_account", "interactive")
 
 Plugin.create(:mikutter_adventure) {
+  def メッセージ生成(メッセージ文字列, ボタン = nil, ボタンを押された時の処理 = nil)
+    @ユーザー ||= AdventureUser.new(
+      idname: "mikutter",
+      name: "みくったーちゃん",
+      uri: "adventure://user/mikutter_chan",
+      profile_image_url: "https://github.com/katsyoshi/mikutter/blob/release/3.0.0/core/skin/data/icon.png?raw=true"
+    )
+
+    メッセージ = AdventureMessage.new(
+      description: メッセージ文字列,
+      created: Time.now,
+      confirm: ボタン,
+      confirm_callback: ボタンを押された時の処理,
+      uri: "adventure://message/#{Time.now.to_s}#{Random.rand(65536)}",
+      user: @ユーザー
+    )
+
+    メッセージ
+  end
 
   def ボタンが押された時の処理(押されたボタン)
     Delayer.new {
       (メッセージ, ボタン) = MikutterAdventure.ゲーム.resume(押されたボタン)
 
       if ボタン
-        timeline(:adventure) << Message.new(system: true, message: メッセージ, confirm: ボタン, confirm_callback: lambda { |押されたボタン| ボタンが押された時の処理(押されたボタン) })
+        timeline(:adventure) << メッセージ生成(メッセージ, ボタン, lambda { |押されたボタン| ボタンが押された時の処理(押されたボタン) })
       else
-        timeline(:adventure) << Message.new(system: true, message: メッセージ)
+        timeline(:adventure) << メッセージ生成(メッセージ)
       end
     }
   end

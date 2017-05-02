@@ -178,9 +178,11 @@ module MikutterAdventure
   @たからもののばしょ = ブロック探索(:Ｇ)
   
   def self.イベント!(プレーヤー)
+    エンディング？ = false
+
     ブロック = @ダンジョン[プレーヤー.y][プレーヤー.x]
   
-    case ブロック
+    イベントデータ = case ブロック
   
     # 会話イベント
     when :e1
@@ -298,6 +300,8 @@ module MikutterAdventure
   
     # ゴール地点
     when :終
+      エンディング？ = true
+
       if プレーヤー.アイテム.include?(:Gem)
         [
           ["あ、出口だよマスター。", "出よう出よう"],
@@ -367,6 +371,8 @@ module MikutterAdventure
     else
       []
     end
+
+    [イベントデータ, エンディング？]
   end
   
   
@@ -418,14 +424,30 @@ module MikutterAdventure
 
   def self.ゲーム
     @ゲーム ||= Fiber.new {
-      @プレーヤー = Player.new
-  
-      (@プレーヤー.x, @プレーヤー.y) = ブロック探索(:始)
-      @プレーヤー.向き = :南
-      @プレーヤー.アイテム = []
+      if UserConfig[:adventure_player] 
+        @プレーヤー = Player.new()
+
+        UserConfig[:adventure_player].keys.each { |key|
+          @プレーヤー[key] = UserConfig[:adventure_player][key]
+        }
+      else
+        @プレーヤー = Player.new()
+        (@プレーヤー.x, @プレーヤー.y) = ブロック探索(:始)
+        @プレーヤー.向き = :南
+        @プレーヤー.アイテム = []
+      end
+
+      if UserConfig[:adventure_map]
+        @ダンジョン = UserConfig[:adventure_map]
+      end
 
       loop {
-        メッセージ配列 = イベント!(@プレーヤー)
+        (メッセージ配列, エンディング？) = イベント!(@プレーヤー)
+
+        if エンディング？
+          UserConfig[:adventure_player] = nil
+          UserConfig[:adventure_map] = nil
+        end
   
         メッセージ配列.each { |メッセージ|
           case メッセージ[0]
@@ -463,6 +485,9 @@ module MikutterAdventure
             @プレーヤー.y = tmp[:y]
           end
         end
+
+        UserConfig[:adventure_player] = @プレーヤー.to_h
+        UserConfig[:adventure_map] = @ダンジョン
       }
     }
   end
